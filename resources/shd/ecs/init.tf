@@ -2,7 +2,7 @@ terraform {
   required_version = "0.13.2"
 
   backend "s3" {
-    bucket = "sample-terraform"
+    bucket = "sample-terraform-1"
     key    = "resources.shd.ecs.tfstate"
     region = "ap-northeast-1"
   }
