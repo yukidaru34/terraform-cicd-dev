@@ -4,5 +4,5 @@ variable "name" {
 
 variable "env" {
   type    = string
-  default = "def"
+  default = "shd"
 }
