@@ -1,0 +1,6 @@
+{
+  "trivy.binaryPath": "trivy",
+  "trivy.debug": false,
+  "trivy.minimumReportedSeverity": "UNKNOWN",
+  "trivy.fixedOnly": false
+}
