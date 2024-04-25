@@ -3,7 +3,7 @@ name: Plan
 on:
   pull_request:
     branches:
-      - main
+      - master
 
 jobs:
   plan:
@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         dir: [
-          modules/ecs,
+          resources/shd/ecs,
         ]
     steps:
       - name: Checkout
@@ -38,7 +38,7 @@ jobs:
         if: steps.diff.outputs.diff
         uses: hashicorp/setup-terraform@v1.2.1
         with:
-          terraform_version: 1.8.1
+          terraform_version: 0.13.2
 
       - name: Check format
         id: fmt
