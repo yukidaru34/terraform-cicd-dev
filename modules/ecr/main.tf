@@ -77,3 +77,38 @@ resource "aws_ecr_lifecycle_policy" "lifecycle_policy" {
     }
   )
 }
+resource "aws_vpc" "vpc" {
+  cidr_block = "10.0.0.0/16"
+  tags = {
+    Name = "AWS_IC_DEV Common-VPC"
+  }
+}
+
+resource "aws_subnet" "subnet_a" {
+  vpc_id     = aws_vpc.vpc.id
+  cidr_block = "10.0.0.0/18"
+
+  tags = {
+    Name = "Common-SN-Priv01-1a"
+  }
+}
+
+resource "aws_subnet" "subnet_b" {
+  vpc_id     = aws_vpc.vpc.id
+  cidr_block = "10.0.64.0/18"
+
+  tags = {
+    Name = "Common-SN-Priv01-1b"
+  }
+}
+
+resource "aws_subnet" "subnet_c" {
+  vpc_id     = aws_vpc.vpc.id
+  cidr_block = "10.0.128.0/18"
+
+  tags = {
+    Name = "Common-SN-Priv01-1c"
+  }
+}
+
+
