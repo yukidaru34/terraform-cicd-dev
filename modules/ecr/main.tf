@@ -84,7 +84,7 @@ resource "aws_vpc" "vpc" {
   }
 }
 
-resource "aws_subnet" "subnet" {
+resource "aws_subnet" "subnet_a" {
   vpc_id     = aws_vpc.vpc.id
   cidr_block = "10.0.0.0/18"
 
@@ -92,4 +92,23 @@ resource "aws_subnet" "subnet" {
     Name = "Common-SN-Priv01-1a"
   }
 }
+
+resource "aws_subnet" "subnet_b" {
+  vpc_id     = aws_vpc.vpc.id
+  cidr_block = "10.0.64.0/18"
+
+  tags = {
+    Name = "Common-SN-Priv01-1b"
+  }
+}
+
+resource "aws_subnet" "subnet_c" {
+  vpc_id     = aws_vpc.vpc.id
+  cidr_block = "10.0.128.0/18"
+
+  tags = {
+    Name = "Common-SN-Priv01-1c"
+  }
+}
+
 
