@@ -167,6 +167,22 @@ resource "aws_lb" "main" {
   
 }
 
+resource "aws_lb_listener" "main"{
+  port = "80"
+  protocol = "HTTP"
+
+  load_balancer_arn = "${aws_lb.main.arn}"
+
+  default_action {
+    type = "fixed-response"
+    fixed_response {
+      content_type = "text/plain"
+      status_code = "200"
+      message_body = "ok"
+    }
+  }
+}
+
 resource "aws_ecs_task_definition" "main"{
   family = "handson"
   requires_compatibilities = [ "FARGATE" ]
@@ -175,7 +191,7 @@ resource "aws_ecs_task_definition" "main"{
   memory = "512"
 
   network_mode = "awsvpc"
-  
+
   container_definitions = <<EOL
   [
     {
@@ -190,5 +206,41 @@ resource "aws_ecs_task_definition" "main"{
     }
   ]
   EOL
+}
+
+//cluster
+resource "aws_ecs_cluster" "main"{
+  name = "handson"
+}
+
+resource "aws_lb_target_group" "main"{
+  name = "handson"
+
+  vpc_id = aws_vpc.vpc.id
+
+  port = 80
+  protocol = "HTTP"
+  target_type = "ip"
+
+  health_check {
+    port = 80
+    path = "/"
+  }
+}
+
+resource "aws_lb_listener_rule" "main" {
+
+  listener_arn = "${aws_lb_listener.main.arn}"
+
+  action {
+    type = "forward"
+    target_group_arn = "${aws_lb_target_group.main.arn}"
+  }
+
+  condition {
+    path_pattern{
+      values = ["*"]    
+    }
+  }
 }
 
