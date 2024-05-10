@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         dir: [
-          resources/shd/ecs,
+          resources/shd/src,
         ]
     steps:
       - name: Checkout
