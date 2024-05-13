@@ -3,7 +3,7 @@ terraform {
 
   backend "s3" {
     bucket = "sample-terraform-1"
-    key    = "resources.shd.ecs.tfstate"
+    key    = "resources.shd.src.tfstate"
     region = "ap-northeast-1"
   }
 }
