@@ -216,6 +216,7 @@ resource "aws_ecs_task_definition" "main" {
   DEFINITION
 }
 
+#　タスク実行用ロール
 resource "aws_iam_role" "ecs_role" {
   name = "ecs_role"
   assume_role_policy = <<EOF
