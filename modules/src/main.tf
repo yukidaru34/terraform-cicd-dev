@@ -1,3 +1,4 @@
+# ECRリポジトリ
 resource "aws_ecr_repository" "main" {
   name                 = "ectr-dev-i231-sample"
   image_tag_mutability = "MUTABLE"
@@ -7,6 +8,9 @@ resource "aws_ecr_repository" "main" {
   }
 }
 
+
+
+#######ネットワーク関連#######
 # VPC
 data "aws_vpc" "vpc" {
   id = "vpc-069f656ea9de1a173"
@@ -25,6 +29,7 @@ data "aws_subnet" "subnet_c" {
    id = "subnet-029983d62d52dde8a"
 }
 
+# インターネットゲートウェイ
 resource "aws_internet_gateway" "main" {
   vpc_id = data.aws_vpc.vpc.id
   tags = {
@@ -45,6 +50,7 @@ resource "aws_route" "main" {
 
 }
 
+# ルートテーブルとの紐づけ
 resource "aws_route_table_association" "public_1a" {
   subnet_id      = data.aws_subnet.subnet_a.id
   route_table_id = data.aws_route_table.main.id
@@ -60,6 +66,10 @@ resource "aws_route_table_association" "public_1d" {
   route_table_id = data.aws_route_table.main.id
 }
 
+
+
+#######ロードバランサ関連#######
+# ALB用セキュリティグループ
 resource "aws_security_group" "alb" {
   name = "alb-security-group"
   description = "alb-security-group"
@@ -77,6 +87,7 @@ resource "aws_security_group" "alb" {
   }
 }
 
+# ALB用セキュリティグループルール
 resource "aws_security_group_rule" "alb" {
   security_group_id = aws_security_group.alb.id
   type = "ingress"
@@ -87,6 +98,7 @@ resource "aws_security_group_rule" "alb" {
   cidr_blocks = ["0.0.0.0/0"]  
 }
 
+# ALB
 resource "aws_lb" "main" {
 
   load_balancer_type = "application"
@@ -97,6 +109,7 @@ resource "aws_lb" "main" {
   
 }
 
+# ALBリスナー
 resource "aws_lb_listener" "main"{
   port = "80"
   protocol = "HTTP"
@@ -113,11 +126,7 @@ resource "aws_lb_listener" "main"{
   }
 }
 
-//cluster
-resource "aws_ecs_cluster" "main"{
-  name = "ecls-dev-I231-sample"
-}
-
+# ALBターゲットグループ
 resource "aws_lb_target_group" "main"{
   name = "tg-dev-I231-sample-app"
 
@@ -133,6 +142,7 @@ resource "aws_lb_target_group" "main"{
   }
 }
 
+# ALBリスナールール
 resource "aws_lb_listener_rule" "main" {
 
   listener_arn = aws_lb_listener.main.arn
@@ -149,6 +159,15 @@ resource "aws_lb_listener_rule" "main" {
   }
 }
 
+
+
+#######ロードバランサ関連#######
+##　ECSクラスタ
+resource "aws_ecs_cluster" "main"{
+  name = "ecls-dev-I231-sample"
+}
+
+# ECS用セキュリティグループ
 resource "aws_security_group" "ecs" {
   name = "security-group"
   description = "handson ecs"
@@ -167,6 +186,7 @@ resource "aws_security_group" "ecs" {
   }
 }
 
+# ECS用セキュリティグループルール
 resource "aws_security_group_rule" "ecs" {
   security_group_id = aws_security_group.ecs.id
 
