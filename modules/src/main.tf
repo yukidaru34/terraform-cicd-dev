@@ -7,83 +7,63 @@ resource "aws_ecr_repository" "main" {
   }
 }
 
-resource "aws_vpc" "vpc" {
-  cidr_block = "10.0.0.0/16"
-  tags = {
-    Name = "AWS_IC_DEV Common-VPC"
-  }
+# VPC
+data "aws_vpc" "vpc" {
+  id = "vpc-069f656ea9de1a173"
 }
 
-resource "aws_subnet" "subnet_a" {
-  vpc_id     = aws_vpc.vpc.id
-  cidr_block = "10.0.0.0/18"
-  availability_zone = "ap-northeast-1a"
-
-  tags = {
-    Name = "Common-SN-Priv01-1a"
-  }
+# サブネット
+data "aws_subnet" "subnet_a" {
+  id = "subnet-0813446eda2ab1d8e"
 }
 
-resource "aws_subnet" "subnet_b" {
-  vpc_id     = aws_vpc.vpc.id
-  cidr_block = "10.0.64.0/18"
-  availability_zone = "ap-northeast-1c"
-
-  tags = {
-    Name = "Common-SN-Priv01-1b"
-  }
+data "aws_subnet" "subnet_b" {
+  id = "subnet-0bbf03a5ca6653d46"
 }
 
-resource "aws_subnet" "subnet_c" {
-  vpc_id     = aws_vpc.vpc.id
-  cidr_block = "10.0.128.0/18"
-  availability_zone = "ap-northeast-1d"
-  tags = {
-    Name = "Common-SN-Priv01-1c"
-  }
+data "aws_subnet" "subnet_c" {
+   id = "subnet-029983d62d52dde8a"
 }
 
 resource "aws_internet_gateway" "main" {
-  vpc_id = aws_vpc.vpc.id
+  vpc_id = data.aws_vpc.vpc.id
   tags = {
     name = "sample-internet-gateway"
   }
 }
 
-resource "aws_route_table" "main" {
-  vpc_id = aws_vpc.vpc.id
-
-   tags = {
-    Name = "Common-RTB-Priv"
-  }
+# ルートテーブル
+data "aws_route_table" "main" {
+  route_table_id  =  "rtb-0ad75363c371989ca"
 }
 
+# ルート
 resource "aws_route" "main" {
   destination_cidr_block = "0.0.0.0/0"
-  route_table_id         = aws_route_table.main.id
+  route_table_id         = data.aws_route_table.main.id
   gateway_id             = aws_internet_gateway.main.id
 
 }
 
 resource "aws_route_table_association" "public_1a" {
-  subnet_id      = aws_subnet.subnet_a.id
-  route_table_id = aws_route_table.main.id
+  subnet_id      = data.aws_subnet.subnet_a.id
+  route_table_id = data.aws_route_table.main.id
 }
 
 resource "aws_route_table_association" "public_1c" {
-  subnet_id      = aws_subnet.subnet_b.id
-  route_table_id = aws_route_table.main.id
+  subnet_id      = data.aws_subnet.subnet_b.id
+  route_table_id = data.aws_route_table.main.id
 }
 
 resource "aws_route_table_association" "public_1d" {
-  subnet_id      = aws_subnet.subnet_c.id
-  route_table_id = aws_route_table.main.id
+  subnet_id      = data.aws_subnet.subnet_c.id
+  route_table_id = data.aws_route_table.main.id
 }
 
 resource "aws_security_group" "alb" {
   name = "alb-security-group"
   description = "alb-security-group"
-  vpc_id = aws_vpc.vpc.id
+  vpc_id = data.aws_vpc.vpc.id
 
   egress {
     from_port   = 0
@@ -113,7 +93,7 @@ resource "aws_lb" "main" {
   name = "alb-dev-I231-sample"
 
   security_groups = [ aws_security_group.alb.id ]
-  subnets = [ aws_subnet.subnet_a.id,aws_subnet.subnet_b.id,aws_subnet.subnet_c.id ]
+  subnets = [ data.aws_subnet.subnet_a.id,data.aws_subnet.subnet_b.id,data.aws_subnet.subnet_c.id ]
   
 }
 
@@ -141,7 +121,7 @@ resource "aws_ecs_cluster" "main"{
 resource "aws_lb_target_group" "main"{
   name = "tg-dev-I231-sample-app"
 
-  vpc_id = aws_vpc.vpc.id
+  vpc_id = data.aws_vpc.vpc.id
 
   port = 80
   protocol = "HTTP"
@@ -173,7 +153,7 @@ resource "aws_security_group" "ecs" {
   name = "security-group"
   description = "handson ecs"
 
-  vpc_id = aws_vpc.vpc.id
+  vpc_id = data.aws_vpc.vpc.id
 
    egress {
     from_port   = 0
