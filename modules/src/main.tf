@@ -26,7 +26,7 @@ data "aws_subnet" "subnet_b" {
 }
 
 data "aws_subnet" "subnet_c" {
-   id = "subnet-029983d62d52dde8a"
+  id = "subnet-029983d62d52dde8a"
 }
 
 # インターネットゲートウェイ
@@ -39,7 +39,7 @@ resource "aws_internet_gateway" "main" {
 
 # ルートテーブル
 data "aws_route_table" "main" {
-  route_table_id  =  "rtb-0ad75363c371989ca"
+  route_table_id = "rtb-0ad75363c371989ca"
 }
 
 # ルート
@@ -71,9 +71,9 @@ resource "aws_route_table_association" "public_1d" {
 #######ロードバランサ関連#######
 # ALB用セキュリティグループ
 resource "aws_security_group" "alb" {
-  name = "alb-security-group"
+  name        = "alb-security-group"
   description = "alb-security-group"
-  vpc_id = data.aws_vpc.vpc.id
+  vpc_id      = data.aws_vpc.vpc.id
 
   egress {
     from_port   = 0
@@ -90,28 +90,28 @@ resource "aws_security_group" "alb" {
 # ALB用セキュリティグループルール
 resource "aws_security_group_rule" "alb" {
   security_group_id = aws_security_group.alb.id
-  type = "ingress"
-  from_port = 80
-  to_port = 80
-  protocol = "tcp"
+  type              = "ingress"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
 
-  cidr_blocks = ["0.0.0.0/0"]  
+  cidr_blocks = ["0.0.0.0/0"]
 }
 
 # ALB
 resource "aws_lb" "main" {
 
   load_balancer_type = "application"
-  name = "alb-dev-I231-sample"
+  name               = "alb-dev-I231-sample"
 
-  security_groups = [ aws_security_group.alb.id ]
-  subnets = [ data.aws_subnet.subnet_a.id,data.aws_subnet.subnet_b.id,data.aws_subnet.subnet_c.id ]
-  
+  security_groups = [aws_security_group.alb.id]
+  subnets         = [data.aws_subnet.subnet_a.id, data.aws_subnet.subnet_b.id, data.aws_subnet.subnet_c.id]
+
 }
 
 # ALBリスナー
-resource "aws_lb_listener" "main"{
-  port = "80"
+resource "aws_lb_listener" "main" {
+  port     = "80"
   protocol = "HTTP"
 
   load_balancer_arn = aws_lb.main.arn
@@ -120,20 +120,20 @@ resource "aws_lb_listener" "main"{
     type = "fixed-response"
     fixed_response {
       content_type = "text/plain"
-      status_code = "200"
+      status_code  = "200"
       message_body = "ok"
     }
   }
 }
 
 # ALBターゲットグループ
-resource "aws_lb_target_group" "main"{
+resource "aws_lb_target_group" "main" {
   name = "tg-dev-I231-sample-app"
 
   vpc_id = data.aws_vpc.vpc.id
 
-  port = 80
-  protocol = "HTTP"
+  port        = 80
+  protocol    = "HTTP"
   target_type = "ip"
 
   health_check {
@@ -148,13 +148,13 @@ resource "aws_lb_listener_rule" "main" {
   listener_arn = aws_lb_listener.main.arn
 
   action {
-    type = "forward"
+    type             = "forward"
     target_group_arn = aws_lb_target_group.main.arn
   }
 
   condition {
-    path_pattern{
-      values = ["*"]    
+    path_pattern {
+      values = ["*"]
     }
   }
 }
@@ -163,18 +163,18 @@ resource "aws_lb_listener_rule" "main" {
 
 #######ロードバランサ関連#######
 ##　ECSクラスタ
-resource "aws_ecs_cluster" "main"{
+resource "aws_ecs_cluster" "main" {
   name = "ecls-dev-I231-sample"
 }
 
 # ECS用セキュリティグループ
 resource "aws_security_group" "ecs" {
-  name = "security-group"
+  name        = "security-group"
   description = "handson ecs"
 
   vpc_id = data.aws_vpc.vpc.id
 
-   egress {
+  egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -204,10 +204,10 @@ resource "aws_security_group_rule" "ecs" {
 
 #　タスク定義
 resource "aws_ecs_task_definition" "main" {
-  family = "etsk-dev-I231-soumu"
-  network_mode = "awsvpc"
-  execution_role_arn = aws_iam_role.ecs_role.arn
-  requires_compatibilities = [ "FARGATE" ]
+  family                   = "etsk-dev-I231-soumu"
+  network_mode             = "awsvpc"
+  execution_role_arn       = aws_iam_role.ecs_role.arn
+  requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
   memory                   = "512"
 
@@ -238,7 +238,7 @@ resource "aws_ecs_task_definition" "main" {
 
 #　タスク実行用ロール
 resource "aws_iam_role" "ecs_role" {
-  name = "ecs_role"
+  name               = "ecs_role"
   assume_role_policy = <<EOF
   {
     "Version": "2008-10-17",
@@ -258,14 +258,14 @@ resource "aws_iam_role" "ecs_role" {
 
 #　ECSサービス
 resource "aws_ecs_service" "main" {
-  name = "esvc-dev-I231"
-  cluster = aws_ecs_cluster.main.id
+  name            = "esvc-dev-I231"
+  cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.main.arn
-  desired_count = 1
-  launch_type = "FARGATE"
+  desired_count   = 1
+  launch_type     = "FARGATE"
   network_configuration {
     assign_public_ip = false
-    subnets          = [data.aws_subnet.subnet_a.id, data.aws_subnet.subnet_b.id,data.aws_subnet.subnet_c.id]
+    subnets          = [data.aws_subnet.subnet_a.id, data.aws_subnet.subnet_b.id, data.aws_subnet.subnet_c.id]
     security_groups  = [aws_security_group.ecs.id]
   }
 }
