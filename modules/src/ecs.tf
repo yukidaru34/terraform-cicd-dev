@@ -39,11 +39,17 @@ resource "aws_security_group_rule" "ecs" {
   cidr_blocks = ["10.0.0.0/16"]
 }
 
+resource "aws_secretsmanager_secret_version" "github_token" {
+  secret_id     = "github_token"
+  secret_string = "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"
+}
+
 #　タスク定義
 resource "aws_ecs_task_definition" "main" {
   family                   = "etsk-dev-I231-soumu"
   network_mode             = "awsvpc"
   execution_role_arn       = aws_iam_role.ecs_role.arn
+  task_role_arn         =  aws_iam_role.ecs_role.arn
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
   memory                   = "512"
@@ -52,10 +58,9 @@ resource "aws_ecs_task_definition" "main" {
   [
     {
       "name": "esvc-dev-I231",
-      "image": "esvc-dev-I231:latest",
+      "image": "ghcr.io/yuuking0304/ectr_dev_i231_sample:latest",
       "portMappings": [
         {
-            "name": "fargatetest-nginx-80-tcp",
             "containerPort": 80,
             "hostPort": 80,
             "protocol": "tcp",
@@ -66,6 +71,12 @@ resource "aws_ecs_task_definition" "main" {
         "cpuArchitecture": "X86_64",
         "operatingSystemFamily": "LINUX"
       },
+      "secrets": [
+        {
+          "name": "GITHUB_TOKEN",
+          "valueFrom": "${aws_secretsmanager_secret_version.github_token.arn}"
+        }
+      ],
       "cpu": 256,
       "memory": 512
     }
@@ -105,4 +116,5 @@ resource "aws_ecs_service" "main" {
     subnets          = [data.aws_subnet.subnet_a.id, data.aws_subnet.subnet_b.id, data.aws_subnet.subnet_c.id]
     security_groups  = [aws_security_group.ecs.id]
   }
+
 }
