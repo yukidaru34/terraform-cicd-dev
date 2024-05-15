@@ -39,10 +39,10 @@ resource "aws_security_group_rule" "ecs" {
   cidr_blocks = ["10.0.0.0/16"]
 }
 
-resource "aws_secretsmanager_secret_version" "github_token" {
-  secret_id     = "github_token"
-  secret_string = "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"
-}
+# resource "aws_secretsmanager_secret_version" "github_token" {
+#   secret_id     = "github_token"
+#   secret_string = "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"
+# }
 
 #　タスク定義
 resource "aws_ecs_task_definition" "main" {
@@ -140,7 +140,7 @@ resource "aws_ecs_service" "main" {
     security_groups  = [aws_security_group.ecs.id]
   }
   depends_on = [
-    aws_lb_target_group.main,
+    aws_lb.main,
   ]
   load_balancer {
     container_name = "ectr_dev_i231"
