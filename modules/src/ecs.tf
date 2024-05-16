@@ -41,7 +41,7 @@ resource "aws_security_group_rule" "ecs" {
 
 resource "aws_secretsmanager_secret_version" "github_token" {
   secret_id     = "github_token"
-  secret_string = "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"
+  secret_string = "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"
 }
 
 #　タスク定義

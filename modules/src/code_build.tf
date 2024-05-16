@@ -23,6 +23,28 @@ EOF
 resource "aws_iam_role_policy_attachment" "codebuild_policy" {
   role       = aws_iam_role.codebuild_role.name
   policy_arn = "arn:aws:iam::aws:policy/AWSCodeBuildAdminAccess"
+
+}
+resource "aws_iam_role_policy" "codebuild_cloudwatch_policy" {
+  name = "codebuild_cloudwatch_policy"
+  role = aws_iam_role.codebuild_role.id
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+EOF
 }
 
 #codebuild
@@ -38,8 +60,15 @@ resource "aws_codebuild_project" "codebuild_project" {
     location        = "https://github.com/yuuking0304/sample-app.git"
     git_clone_depth = 1
     buildspec       = "buildspec.yml"
+    # # TODO
+    # auth {
+    #   type     = "OAUTH"
+    #   resource =  "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"
+    #   # // replace thiss with your GitHub personal access token
+    # }
   }
 
+  
   artifacts {
     type = "NO_ARTIFACTS"
   }
