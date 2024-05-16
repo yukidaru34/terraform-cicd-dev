@@ -39,10 +39,10 @@ resource "aws_security_group_rule" "ecs" {
   cidr_blocks = ["10.0.0.0/16"]
 }
 
-# resource "aws_secretsmanager_secret_version" "github_token" {
-#   secret_id     = "github_token"
-#   secret_string = "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"
-# }
+resource "aws_secretsmanager_secret_version" "github_token" {
+  secret_id     = "github_token"
+  secret_string = "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"
+}
 
 #　タスク定義
 resource "aws_ecs_task_definition" "main" {
