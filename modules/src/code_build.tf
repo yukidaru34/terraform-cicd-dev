@@ -18,7 +18,25 @@ resource "aws_iam_role" "codebuild_role" {
 }
 EOF
 }
+resource "aws_iam_policy" "ssm_policy" {
+  name        = "ssm-policy"
+  description = "Allows CodeBuild to access SSM parameters"
+  policy      = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": "ssm:GetParameters",
+        "Resource": "*"
+      }
+    ]
+  })
+}
 
+resource "aws_iam_role_policy_attachment" "ssm_policy_attachment" {
+  policy_arn = aws_iam_policy.ssm_policy.arn
+  role       = aws_iam_role.codebuild_role.name
+}
 #policyのアタッチ
 resource "aws_iam_role_policy_attachment" "codebuild_policy" {
   role       = aws_iam_role.codebuild_role.name
