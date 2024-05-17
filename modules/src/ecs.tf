@@ -1,9 +1,17 @@
 #######ECS関連#######
-##　ECSクラスタ
+##　ECSクラスタ(main)
 resource "aws_ecs_cluster" "main" {
   name = "ecls-dev-I231-sample"
 }
 
+##　ECSクラスタ(jump_server)
+resource "aws_ecs_cluster" "jump_server" {
+  name = "ecls-dev-I231-jumpserver"
+}
+
+
+
+# TODO:ネットワーク関連の知識が追い付いていなく、どうあるべきかがわからない
 # ECS用セキュリティグループ
 resource "aws_security_group" "ecs" {
   name        = "security-group"
