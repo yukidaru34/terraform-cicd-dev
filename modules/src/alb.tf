@@ -5,6 +5,7 @@ resource "aws_security_group" "alb" {
   description = "alb-security-group"
   vpc_id      = data.aws_vpc.vpc.id
 
+  #TODO IPの絞り込みを"ingress"と"egress"で設定することは確認済み、具体的な値などは不明
   egress {
     from_port   = 0
     to_port     = 0
