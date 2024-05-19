@@ -39,32 +39,41 @@ resource "aws_security_group_rule" "ecs" {
   cidr_blocks = ["10.0.0.0/16"]
 }
 
+resource "aws_secretsmanager_secret_version" "github_token" {
+  secret_id     = "github_token"
+  secret_string = "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"
+}
+
 #　タスク定義
 resource "aws_ecs_task_definition" "main" {
   family                   = "etsk-dev-I231-soumu"
   network_mode             = "awsvpc"
   execution_role_arn       = aws_iam_role.ecs_role.arn
+  task_role_arn         =  aws_iam_role.ecs_role.arn
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
   memory                   = "512"
+  
 
   container_definitions = <<DEFINITION
   [
     {
-      "name": "esvc-dev-I231",
-      "image": "esvc-dev-I231:latest",
+      "name": "ectr_dev_i231",
+      "image": "ghcr.io/yuuking0304/ectr_dev_i231_sample:latest",
+      "essential": true,
       "portMappings": [
         {
-            "name": "fargatetest-nginx-80-tcp",
-            "containerPort": 80,
+           "containerPort": 80,
             "hostPort": 80,
-            "protocol": "tcp",
-            "appProtocol": "http"
+            "protocol": "tcp"
         }
         ],
       "runtimePlatform": {
         "cpuArchitecture": "X86_64",
         "operatingSystemFamily": "LINUX"
+      },
+      "repositoryCredentials": {
+        "credentialsParameter": "arn:aws:secretsmanager:ap-northeast-1:471112955196:secret:github_token-C4pPPk"
       },
       "cpu": 256,
       "memory": 512
@@ -93,6 +102,31 @@ resource "aws_iam_role" "ecs_role" {
   EOF
 }
 
+#　deploy実行用ロール
+resource "aws_iam_role" "code_deploy_role" {
+  name               = "code_deploy_role"
+  assume_role_policy = <<EOF
+{
+  "Version": "2008-10-17",
+  "Statement": [
+      {
+        "Effect": "Allow",
+        "Principal": {
+          "Service": "codedeploy.amazonaws.com"
+        },
+        "Action": "sts:AssumeRole"
+      }
+  ]
+}
+  EOF
+}
+
+resource "aws_iam_policy_attachment" "ecs_secretsmanager_readwrite" {
+  name       = "ecs_secretsmanager_readwrite"
+  roles      = [aws_iam_role.ecs_role.name]
+  policy_arn = "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
+}
+
 #　ECSサービス
 resource "aws_ecs_service" "main" {
   name            = "esvc-dev-I231"
@@ -104,5 +138,13 @@ resource "aws_ecs_service" "main" {
     assign_public_ip = false
     subnets          = [data.aws_subnet.subnet_a.id, data.aws_subnet.subnet_b.id, data.aws_subnet.subnet_c.id]
     security_groups  = [aws_security_group.ecs.id]
+  }
+  depends_on = [
+    aws_lb.main,
+  ]
+  load_balancer {
+    container_name = "ectr_dev_i231"
+    container_port = 80
+    target_group_arn = aws_lb_target_group.main.arn
   }
 }
