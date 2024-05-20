@@ -180,8 +180,8 @@ resource "aws_ecs_service" "main" {
   desired_count   = 1
   launch_type     = "FARGATE"
   network_configuration {
-    assign_public_ip = false
-    subnets          = [data.aws_subnet.subnet_a.id, data.aws_subnet.subnet_b.id, data.aws_subnet.subnet_c.id]
+    assign_public_ip = true
+    subnets          = [data.aws_subnet.public_subnet_a.id]
     security_groups  = [aws_security_group.ecs.id]
   }
   ##　TODO:terraformは依存関係を意識せずにコードをかける。この書き方で依存関係を強制させることは適切か？
