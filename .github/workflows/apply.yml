@@ -3,7 +3,6 @@ name: Apply
 on:
   push:
     branches:
-
       - main
 
 jobs:
@@ -22,12 +21,14 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 2
 
-      - name: Setup terraform
-        uses: hashicorp/setup-terraform@v1.2.0
-        with:
-          terraform_version: 1.7.4
+      - name: Setup Terraform
+        run: |
+          wget https://releases.hashicorp.com/terraform/1.7.4/terraform_1.7.4_linux_amd64.zip
+          unzip terraform_1.7.4_linux_amd64.zip
+          sudo mv terraform /usr/local/bin/
+          terraform --version
 
-      - name: Configure aws credentials
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
