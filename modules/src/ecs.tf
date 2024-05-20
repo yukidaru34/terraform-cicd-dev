@@ -53,7 +53,7 @@ resource "aws_secretsmanager_secret_version" "github_token" {
   secret_string = <<EOF
 {
   "username": "yuuking0304",
-  "password": "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"
+  "password": var.github_pat
 }
 EOF
 }
