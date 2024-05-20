@@ -17,6 +17,10 @@ data "aws_subnet" "subnet_c" {
   id = "subnet-029983d62d52dde8a"
 }
 
+data "aws_subnet" "public_subnet_a" {
+  id = "subnet-0842ee2071bb1093a"
+}
+
 # インターネットゲートウェイ
 resource "aws_internet_gateway" "main" {
   vpc_id = data.aws_vpc.vpc.id
@@ -28,6 +32,11 @@ resource "aws_internet_gateway" "main" {
 # ルートテーブル
 data "aws_route_table" "main" {
   route_table_id = "rtb-0ad75363c371989ca"
+}
+
+# ルートテーブル
+data "aws_route_table" "public" {
+  route_table_id = "rtb-0b44ac3933a945d1c"
 }
 
 # ルート
@@ -52,4 +61,30 @@ resource "aws_route_table_association" "public_1c" {
 resource "aws_route_table_association" "public_1d" {
   subnet_id      = data.aws_subnet.subnet_c.id
   route_table_id = data.aws_route_table.main.id
+}
+
+resource "aws_route_table_association" "public_sample_1d" {
+  subnet_id      = data.aws_subnet.public_subnet_a.id
+  route_table_id = data.aws_route_table.public.id
+}
+
+resource "aws_eip" "sample_eip" {
+  vpc = true
+
+  tags = {
+    Name = "terraform-sample-eip"
+  }
+}
+
+resource "aws_nat_gateway" "sample_nat_gateway" {
+  allocation_id = aws_eip.sample_eip.id
+  subnet_id     = data.aws_subnet.public_subnet_a.id
+
+  tags = {
+    Name = "gw NAT"
+  }
+
+  # To ensure proper ordering, it is recommended to add an explicit dependency
+  # on the Internet Gateway for the VPC.
+  depends_on = []
 }
