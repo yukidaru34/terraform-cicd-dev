@@ -49,7 +49,7 @@ resource "aws_security_group_rule" "ecs" {
 
 # PATをsecretsmanagerで管理
 resource "aws_secretsmanager_secret_version" "github_token" {
-  secret_id     = "github_token"
+  secret_id     = "yuuking0304"
   secret_string = "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"
 }
 
