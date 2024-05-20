@@ -1,9 +1,17 @@
 #######ECS関連#######
-##　ECSクラスタ
+##　ECSクラスタ(main)
 resource "aws_ecs_cluster" "main" {
   name = "ecls-dev-I231-sample"
 }
 
+##　ECSクラスタ(jump_server)
+resource "aws_ecs_cluster" "jump_server" {
+  name = "ecls-dev-I231-jumpserver"
+}
+
+
+
+# TODO:ネットワーク関連の知識が追い付いていなく、どうあるべきかがわからない
 # ECS用セキュリティグループ
 resource "aws_security_group" "ecs" {
   name        = "security-group"
@@ -39,6 +47,7 @@ resource "aws_security_group_rule" "ecs" {
   cidr_blocks = ["10.0.0.0/16"]
 }
 
+# PATをsecretsmanagerで管理
 resource "aws_secretsmanager_secret_version" "github_token" {
   secret_id     = "github_token"
   secret_string = "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"
@@ -121,6 +130,7 @@ resource "aws_iam_role" "code_deploy_role" {
   EOF
 }
 
+# secretsmanagerを参照するためのポリシーをアタッチ
 resource "aws_iam_policy_attachment" "ecs_secretsmanager_readwrite" {
   name       = "ecs_secretsmanager_readwrite"
   roles      = [aws_iam_role.ecs_role.name]
@@ -139,6 +149,7 @@ resource "aws_ecs_service" "main" {
     subnets          = [data.aws_subnet.subnet_a.id, data.aws_subnet.subnet_b.id, data.aws_subnet.subnet_c.id]
     security_groups  = [aws_security_group.ecs.id]
   }
+  ##　TODO:terraformは依存関係を意識せずにコードをかける。この書き方で依存関係を強制させることは適切か？
   depends_on = [
     aws_lb.main,
   ]
