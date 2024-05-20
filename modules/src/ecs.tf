@@ -50,7 +50,12 @@ resource "aws_security_group_rule" "ecs" {
 # PATをsecretsmanagerで管理
 resource "aws_secretsmanager_secret_version" "github_token" {
   secret_id     = "github_token"
-  secret_string = "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"
+  secret_string = <<EOF
+{
+  "username": "yuuking0304",
+  "password": "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"
+}
+EOF
 }
 
 #　タスク定義
@@ -68,7 +73,7 @@ resource "aws_ecs_task_definition" "main" {
   [
     {
       "name": "ectr_dev_i231",
-      "image": "ghcr.io/yuuking0304/ectr_dev_i231_sample:latest",
+      "image": "ghcr.io/yuuking0304/sample-app/ectr_dev_i231_sample:latest",
       "essential": true,
       "portMappings": [
         {
@@ -110,6 +115,35 @@ resource "aws_iam_role" "ecs_role" {
 }
   EOF
 }
+
+resource "aws_iam_policy" "secrets_manager_read" {
+  name        = "secrets_manager_read"
+  description = "Allows reading secrets from Secrets Manager"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:DescribeSecret"
+      ],
+      "Resource": "arn:aws:secretsmanager:ap-northeast-1:471112955196:secret:github_token-C4pPPk"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_secrets_manager_read" {
+  role       = aws_iam_role.ecs_role.name
+  policy_arn = aws_iam_policy.secrets_manager_read.arn
+}
+
+
+
 
 #　deploy実行用ロール
 resource "aws_iam_role" "code_deploy_role" {
