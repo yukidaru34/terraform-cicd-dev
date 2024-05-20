@@ -1,3 +1,4 @@
+variable "github_pat" {}
 #######ECS関連#######
 ##　ECSクラスタ(main)
 resource "aws_ecs_cluster" "main" {
@@ -53,7 +54,7 @@ resource "aws_secretsmanager_secret_version" "github_token" {
   secret_string = <<EOF
 {
   "username": "yuuking0304",
-  "password": var.github_pat
+  "password": "${var.github_pat}"
 }
 EOF
 }
