@@ -1,5 +1,5 @@
 resource "aws_ssm_parameter" "github_pat" {
   name  = "PAT"
   type  = "SecureString"
-  value = "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"
+  value = "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"
 }
