@@ -4,7 +4,7 @@ resource "aws_db_instance" "main" {
     engine               = "postgres"
     engine_version       = "16.3"
     instance_class       = "db.t4g.micro"
-    username             = "M@ster"
+    username             = "Master"
     password             = "P@ssw0rd"
     skip_final_snapshot  = true
 }
