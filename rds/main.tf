@@ -5,6 +5,6 @@ resource "aws_db_instance" "main" {
     engine_version       = "16.3"
     instance_class       = "db.t4g.micro"
     username             = "Master"
-    password             = "P@ssw0rd"
+    password             = "Passw0rd"
     skip_final_snapshot  = true
 }
